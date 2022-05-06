@@ -1,0 +1,8 @@
+sps.build.sh
+sps.import.scm
+sps.import.so
+sps.install.sh
+sps.link
+sps.so
+sps.static.o
+sps.c
