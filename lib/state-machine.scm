@@ -36,6 +36,8 @@
 (define (end-state? sm state)
   (member (state-name state) (sm-end-states sm)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-syntax define-state-machine
   (syntax-rules (start end)
     ((define-state-machine NAME (start START) (end ENDS) BODY ...)
