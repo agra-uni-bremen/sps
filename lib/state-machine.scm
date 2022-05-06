@@ -36,22 +36,19 @@
 (define (end-state? sm state)
   (member (state-name state) (sm-end-states sm)))
 
-;; XXX: Currently only one state-machine can be declared.
-;; TODO: Could use a plist here to support multiple state machines.
-(define state-machine '())
-
 (define-syntax define-state-machine
   (syntax-rules (start end)
     ((define-state-machine NAME (start START) (end ENDS) BODY ...)
      (define-state-machine
        NAME
-       (begin
-         (when (null? state-machine)
-           (set! state-machine
-             (make-sm
-               (make-state (quote START) START)
-               (list (quote ENDS)))))
-         state-machine)
+       (let ((s (get 'state-machines (quote NAME))))
+         (if s
+           s
+           (put! 'state-machines
+                 (quote NAME)
+                 (make-sm
+                   (make-state (quote START) START)
+                   (list (quote ENDS))))))
        BODY ...))
     ((define-state-machine NAME SM BODY ...)
      (define (NAME input)
