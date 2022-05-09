@@ -12,8 +12,10 @@
           (bencode)
           (sisl))
 
-  (export define-state-machine define-state -> state-machine-run sm-server)
+  (export define-state-machine define-state -> state-machine-run
+          sm-server parse-message)
 
   (include "lib/util.scm"
            "lib/state-machine.scm"
-           "lib/protocol.scm"))
+           "lib/protocol.scm"
+           "lib/parser.scm"))

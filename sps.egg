@@ -10,4 +10,5 @@
               (source-dependencies
                 "./lib/util.scm"
                 "./lib/state-machine.scm"
-                "./lib/protocol.scm"))))
+                "./lib/protocol.scm"
+                "./lib/parser.scm"))))
