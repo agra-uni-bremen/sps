@@ -1,7 +1,7 @@
 ((author "Sören Tempel")
  (synopsis "Scheme library to specify network protocol state machines")
  (license "MIT")
- (dependencies r7rs srfi-1 srfi-151 sisl)
+ (dependencies r7rs srfi-1 srfi-151 bencode sisl)
  (test-dependencies test)
  (components
    (extension sps
@@ -9,4 +9,5 @@
               (source "sps.sld")
               (source-dependencies
                 "./lib/util.scm"
-                "./lib/state-machine.scm"))))
+                "./lib/state-machine.scm"
+                "./lib/protocol.scm"))))
