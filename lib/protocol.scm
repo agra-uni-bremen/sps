@@ -7,7 +7,7 @@
                       ((resp has-next?) (state-machine-run sm bv)))
           (write-format resp output-port)
           (if has-next?
-            (handle-conn input-port output-port)))))))
+            (handle-conn sm input-port output-port)))))))
 
 (define (sm-server sm host port)
   ;; Default backlog according to tcp-listen documentation.
