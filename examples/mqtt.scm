@@ -44,7 +44,7 @@
       (CONNECT (-> (connack-fmt code-accept) connected))))
 
   (define-state (connected input)
-    (match (mqtt-msg-type subscribe)
+    (match (mqtt-msg-type input)
       (SUBSCRIBE  (-> (error "subscribe not implemented") connected))
       (DISCONNECT (-> disconn-fmt disconnected))))
 
