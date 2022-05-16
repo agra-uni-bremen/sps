@@ -3,7 +3,6 @@
         (scheme process-context)
 
         (srfi 1)
-        (matchable)
         (sisl)
         (sps))
 
@@ -39,14 +38,13 @@
   (end   disconnected)
 
   (define-state (pre-connected input)
-    (match (mqtt-msg-type input)
-      ;; TODO: Symbolic code.
-      (CONNECT (-> (connack-fmt code-accept) connected))))
+    (switch (mqtt-msg-type input)
+      ((CONNECT) (-> (connack-fmt code-accept) connected))))
 
   (define-state (connected input)
-    (match (mqtt-msg-type input)
-      (SUBSCRIBE  (-> (error "subscribe not implemented") connected))
-      (DISCONNECT (-> disconn-fmt disconnected))))
+    (switch (mqtt-msg-type input)
+      ((SUBSCRIBE)  (-> (error "subscribe not implemented") connected))
+      ((DISCONNECT) (-> disconn-fmt disconnected))))
 
   (define-state disconnected))
 
