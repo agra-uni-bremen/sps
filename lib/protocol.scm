@@ -24,7 +24,9 @@
                           (error-object-message eobj))
                 (k #f))
               (lambda ()
-                (handle-conn sm in out)))))
+                (parameterize ((tcp-read-timeout #f)
+                               (tcp-write-timeout #f))
+                  (handle-conn sm in out))))))
 
         (close-input-port in)
         (close-output-port out)))))
