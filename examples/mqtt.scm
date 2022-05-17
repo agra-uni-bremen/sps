@@ -6,6 +6,28 @@
         (sisl)
         (sps))
 
+(define (get-field bv field-name)
+  (let* ((fmt (ipv6-packet 0 (udp-datagram mqtt-header)))
+         (alist (parse-message bv fmt))
+         (value (assq field-name alist)))
+    (if value
+      (cdr value)
+      (error (string-append "no field named: " (symbol->string field-name))))))
+
+(define (mqtt-msg-type bv)
+  (let ((mtype (get-field bv 'mtype)))
+    (if (eq? (bytevector-length mtype) 1)
+      (let ((c (bytevector-u8-ref mtype 0)))
+        (println "message type: " c)
+        c)
+      (error "invalid mtype field"))))
+
+(define (make-response fmt)
+  (ipv6-packet
+    udp-next-header
+    (udp-datagram
+      fmt)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; IPv6 constants
@@ -51,12 +73,6 @@
   (make-uint 'mtype  8 mqtt-msg-connack)
   (make-uint 'return 16 code))
 
-; (write-format
-;   (ipv6-packet
-;     udp-next-header
-;     (udp-datagram
-;       (mqtt-connack mqtt-code-accept))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define CONNECT    #x04)
@@ -77,26 +93,6 @@
 (define-input-format disconn-fmt
   (make-uint 'length 8 2)
   (make-uint 'type   8 DISCONNECT))
-
-(define (get-field bv field-name)
-  (let* ((fmt (ipv6-packet 0 (udp-datagram mqtt-header)))
-         (alist (parse-message bv fmt))
-         (value (assq field-name alist)))
-    (if value
-      (cdr value)
-      (error (string-append "no field named: " (symbol->string field-name))))))
-
-(define (mqtt-msg-type bv)
-  (let ((mtype (get-field bv 'mtype)))
-    (if (eq? (bytevector-length mtype) 1)
-      (bytevector-u8-ref mtype 0)
-      (error "invalid mtype field"))))
-
-(define (make-response fmt)
-  (ipv6-packet
-    udp-next-header
-    (udp-datagram
-      fmt)))
 
 (define-state-machine mqtt-machine
   (start pre-connected)
