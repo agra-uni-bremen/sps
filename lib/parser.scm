@@ -4,6 +4,16 @@
 (define (bits->number vec)
   (apply bits (vector->list vec)))
 
+(: bits->bytevector ((vector-of bit) -> bytevector))
+(define (bits->bytevector vec)
+  (if (<= (vector-length vec) 8)
+    (bytevector (bits->number vec))
+    (let ((bcar (vector-copy vec 0 8))
+          (bcdr (vector-copy vec 8)))
+      (bytevector-append
+        (bits->bytevector bcdr)
+        (bytevector (bits->number bcar))))))
+
 ;; Fold a bytevector from LSB to MSB.
 
 (define (bytevector-fold proc seed bv)
@@ -55,7 +65,7 @@
                     start
                     (append
                       prev-lst
-                      (list (cons name (bits->number
+                      (list (cons name (bits->bytevector
                                          (vector-copy
                                            bitvector
                                            start
