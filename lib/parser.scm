@@ -49,7 +49,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(: parse-message (bytevector (struct Input-Format) -> (list-of pair)))
+;; Type for field pairs.
+(define-type field-pair (pair symbol bytevector))
+
+(: parse-message (bytevector (struct Input-Format) -> (list-of field-pair)))
 (define (parse-message msg fmt)
   (if (> (bytevector-length msg) (input-format-bytesize fmt))
     (error "length of message does not match format length")
