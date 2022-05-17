@@ -13,7 +13,7 @@
           (sisl))
 
   (export define-state-machine define-state -> state-machine-run
-          sm-server parse-message)
+          sm-server parse-message switch)
 
   (include "lib/util.scm"
            "lib/state-machine.scm"
