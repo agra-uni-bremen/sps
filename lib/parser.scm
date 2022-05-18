@@ -39,6 +39,18 @@
         (vector-append vec padded)))
     #() bv))
 
+;; Convert a bytevector to a number.
+
+(: bytevector->number (bytevector -> number))
+(define (bytevector->number bv)
+  (let ((shift-proc (lambda (idx) (* idx 8))))
+    (apply bitwise-ior
+           (map (lambda (index)
+                   (arithmetic-shift
+                     (bytevector-u8-ref bv index)
+                     (shift-proc index)))
+                (iota (bytevector-length bv))))))
+
 ;; Pare definition from R7RS specification.
 
 (define-record-type Pare
