@@ -88,7 +88,7 @@
 (define-input-format (connack-fmt code)
   (make-uint 'length 8 3)
   (make-uint 'mtype  8 CONNACK)
-  (make-uint 'return 16 code))
+  (make-uint 'return 8 code))
 
 (define-input-format disconn-fmt
   (make-uint 'length 8 2)
