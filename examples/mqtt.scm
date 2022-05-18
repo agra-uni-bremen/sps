@@ -92,13 +92,19 @@
       (bytevector-u8-ref mtype 0)
       (error "invalid mtype field"))))
 
+(define (make-response fmt)
+  (ipv6-packet
+    udp-next-header
+    (udp-datagram
+      fmt)))
+
 (define-state-machine mqtt-machine
   (start pre-connected)
   (end   disconnected)
 
   (define-state (pre-connected input)
     (switch (mqtt-msg-type input)
-      ((CONNECT) (-> (connack-fmt code-accept) connected))))
+      ((CONNECT) (-> (make-response (connack-fmt code-accept)) connected))))
 
   (define-state (connected input)
     (switch (mqtt-msg-type input)
