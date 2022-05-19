@@ -39,17 +39,20 @@
         (vector-append vec padded)))
     #() bv))
 
-;; Convert a bytevector to a number.
+;; Interpret bytevector as an unsigned big-endian integer.
 
 (: bytevector->number (bytevector -> number))
 (define (bytevector->number bv)
   (let ((shift-proc (lambda (idx) (* idx 8))))
     (apply bitwise-ior
-           (map (lambda (index)
-                   (arithmetic-shift
-                     (bytevector-u8-ref bv index)
-                     (shift-proc index)))
-                (iota (bytevector-length bv))))))
+           (fold-right
+             (lambda (index prev)
+               (cons
+                 (arithmetic-shift
+                   (bytevector-u8-ref bv index)
+                   (shift-proc (length prev)))
+                 prev))
+             '() (iota (bytevector-length bv))))))
 
 ;; Pare definition from R7RS specification.
 
