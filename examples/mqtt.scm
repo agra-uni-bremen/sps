@@ -15,7 +15,18 @@
       (error (string-append "no field named: " (symbol->string field-name))))))
 
 (define (mqtt-msg-type bv)
-  (bytevector->number (get-field bv 'mtype)))
+  (bytevector->number 
+    (get-field
+      bv
+      (ipv6-packet 0 (udp-datagram mqtt-header))
+      'mtype)))
+
+(define (mqtt-msg-id bv)
+  (bytevector->number
+    (get-field
+      bv
+      (ipv6-packet 0 (udp-datagram (subscribe-fmt 0)))
+      'msgid)))
 
 (define (make-response fmt)
   (ipv6-packet
@@ -74,6 +85,7 @@
 (define CONNACK    #x05)
 (define DISCONNECT #x18)
 (define SUBSCRIBE  #x12)
+(define SUBACK     #x13)
 
 (define code-accept #x00)
 (define code-congestion #x01)
@@ -84,6 +96,21 @@
   (make-uint 'length 8 3)
   (make-uint 'mtype  8 CONNACK)
   (make-uint 'return 8 code))
+
+(define-input-format (subscribe-fmt id)
+  (make-uint 'length  8 7)
+  (make-uint 'mtype   8 SUBSCRIBE)
+  (make-uint 'flags   8 0)
+  (make-uint 'msgid   16 id)
+  (make-uint 'topic   16 23))
+
+(define-input-format (suback-fmt id)
+  (make-uint 'length  8 8)
+  (make-uint 'mtype   8 SUBACK)
+  (make-uint 'flags   8 0)
+  (make-uint 'topicid 16 23)
+  (make-uint 'msgid   16 id)
+  (make-uint 'return  8 code-accept))
 
 (define-input-format disconn-fmt
   (make-uint 'length 8 2)
@@ -99,8 +126,11 @@
 
   (define-state (connected input)
     (switch (mqtt-msg-type input)
-      ((SUBSCRIBE)  (-> (error "subscribe not implemented") connected))
+      ((SUBSCRIBE)  (-> (make-response (suback-fmt (mqtt-msg-id input))) subscribed))
       ((DISCONNECT) (-> disconn-fmt disconnected))))
+
+  (define-state (subscribed input)
+    (error "not implemented"))
 
   (define-state disconnected))
 
