@@ -15,12 +15,7 @@
       (error (string-append "no field named: " (symbol->string field-name))))))
 
 (define (mqtt-msg-type bv)
-  (let ((mtype (get-field bv 'mtype)))
-    (if (eq? (bytevector-length mtype) 1)
-      (let ((c (bytevector-u8-ref mtype 0)))
-        (println "message type: " c)
-        c)
-      (error "invalid mtype field"))))
+  (bytevector->number (get-field bv 'mtype)))
 
 (define (make-response fmt)
   (ipv6-packet
