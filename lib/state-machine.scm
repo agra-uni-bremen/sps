@@ -83,6 +83,9 @@
        EXPR
        (make-state (quote NEW-STATE) NEW-STATE)))))
 
+(define (state-machine-reset! name)
+  (put! 'state-machines name #f))
+
 (define (state-machine-run sm input)
   ;; This can obviously be shortend to (sm input).
   (let-values (((ret has-next?) (sm input)))
