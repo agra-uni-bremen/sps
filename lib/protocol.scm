@@ -1,13 +1,28 @@
+(define DATA  #x00)
+(define RESET #x01)
+
 (define (handle-conn sm input-port output-port)
-  (let ((bencode (read-bencode input-port)))
-    (when bencode ;; not EOF
-      (if (not (string? bencode))
-        (error "unexpected bencode type")
-        (let*-values (((bv) (string->utf8 bencode))
-                      ((resp has-next?) (state-machine-run sm bv)))
-          (write-format resp output-port)
-          (if has-next?
-            (handle-conn sm input-port output-port)))))))
+  (let ((msg (read-bencode input-port)))
+    (when msg ;; not eof
+      (when (or (not (vector? msg)) (not (eq? (vector-length msg) 2)))
+        (error "invalid bencode message"))
+
+      (let ((msg-type (vector-ref msg 0))
+            (msg-content (vector-ref msg 1)))
+        (switch msg-type
+          ((RESET)
+           (state-machine-reset! 'mqtt)
+           (handle-conn sm input-port output-port))
+
+          ((DATA)
+           (unless (string? msg-content)
+             (error "unexpected bencode data type"))
+
+           (let*-values (((bv) (string->utf8 msg-content))
+                         ((resp has-next?) (state-machine-run sm bv)))
+             (write-format resp output-port)
+             (when has-next?
+               (handle-conn sm input-port output-port)))))))))
 
 (define (sm-server sm host port)
   ;; Default backlog according to tcp-listen documentation.
