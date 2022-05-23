@@ -11,7 +11,7 @@
             (msg-content (vector-ref msg 1)))
         (switch msg-type
           ((RESET)
-           (state-machine-reset! 'mqtt)
+           (state-machine-reset! 'mqtt-machine) ;; TODO
            (handle-conn sm input-port output-port))
 
           ((DATA)
