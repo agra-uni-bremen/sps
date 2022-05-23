@@ -84,7 +84,7 @@
        (make-state (quote NEW-STATE) NEW-STATE)))))
 
 (define (state-machine-reset! name)
-  (put! 'state-machines name #f))
+  (remprop! 'state-machines name))
 
 (define (state-machine-run sm input)
   ;; This can obviously be shortend to (sm input).
