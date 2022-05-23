@@ -15,7 +15,7 @@
       (error (string-append "no field named: " (symbol->string field-name))))))
 
 (define (mqtt-msg-type bv)
-  (bytevector->number 
+  (bytevector->number
     (get-field
       bv
       (ipv6-packet 0 (udp-datagram mqtt-header))
