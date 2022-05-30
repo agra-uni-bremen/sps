@@ -31,17 +31,9 @@
   (let ((listener (tcp-listen port backlog host)))
     (loop
       (let*-values (((in out) (tcp-accept listener)))
-        (call-with-current-continuation
-          (lambda (k)
-            (with-exception-handler
-              (lambda (eobj)
-                (fprintln (current-error-port)
-                          (error-object-message eobj))
-                (k #f))
-              (lambda ()
-                (parameterize ((tcp-read-timeout #f)
-                               (tcp-write-timeout #f))
-                  (handle-conn sm in out))))))
+        (parameterize ((tcp-read-timeout #f)
+                       (tcp-write-timeout #f))
+          (handle-conn sm in out))
 
         (close-input-port in)
         (close-output-port out)))))
