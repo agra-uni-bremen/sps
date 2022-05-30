@@ -42,10 +42,15 @@
                           #x00 #x00 #x00 #x00
                           #x00 #x00 #x00 #x00
                           #x00 #x00 #x00 #x01))
+(define ipv6-srcaddr #u8(#xfe #x80 #x00 #x00
+                         #x00 #x00 #x00 #x00
+                         #xca #xfe #xca #xfe
+                         #xca #xfe #x00 #x02))
 
 ;; UDP constants
 (define udp-next-header 17)
-(define udp-port 1883) ;; CONFIG_EMCUTE_DEFAULT_PORT
+(define udp-port 1883)     ;; CONFIG_EMCUTE_DEFAULT_PORT
+(define udp-src-port 2389) ;; can essentially be anything
 
 ;; MQTT constants
 (define mqtt-msg-connack #x05)
@@ -59,15 +64,15 @@
   (make-uint 'payload-length 16 (input-format-bytesize payload))
   (make-uint 'next-header 8 next-hdr)
   (make-uint 'hop-limit 8 #x42)
-  (make-symbolic 'src-addr 128)
+  (make-concrete 'src-addr 128 ipv6-srcaddr)
   (make-concrete 'dst-addr 128 ipv6-loopback))
 
 ;; See https://datatracker.ietf.org/doc/html/rfc768
 (define-input-format (udp-datagram &encapsulate payload)
-  (make-symbolic 'src-port 16)
+  (make-uint 'src-port 16 udp-src-port)
   (make-uint 'dst-port 16 udp-port)
   (make-uint 'length 16 (+ 8 (input-format-bytesize payload)))
-  (make-symbolic 'checksum 16))
+  (make-uint 'checksum 16 0)) ;; checksum checks disabled in RIOT
 
 (define-input-format mqtt-header
   (make-uint 'length 8 3)
@@ -95,7 +100,7 @@
 (define-input-format (connack-fmt code)
   (make-uint 'length 8 3)
   (make-uint 'mtype  8 CONNACK)
-  (make-uint 'return 8 code))
+  (make-symbolic 'return 8))
 
 (define-input-format (subscribe-fmt id)
   (make-uint 'length  8 7)
