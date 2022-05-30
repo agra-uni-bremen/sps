@@ -34,6 +34,7 @@
         ;; Reset state machine everytime the client reconnects.
         (state-machine-reset! 'mqtt-machine)
 
+        ;; Disable read and write timeouts (default: 1 min).
         (parameterize ((tcp-read-timeout #f)
                        (tcp-write-timeout #f))
           (handle-conn sm in out))
