@@ -6,9 +6,10 @@
         (sisl)
         (sps))
 
-(define (get-field bv field-name)
-  (let* ((fmt (ipv6-packet 0 (udp-datagram mqtt-header)))
-         (alist (parse-message bv fmt))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (get-field bv fmt field-name)
+  (let* ((alist (parse-message bv fmt))
          (value (assq field-name alist)))
     (if value
       (cdr value)
