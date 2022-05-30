@@ -31,6 +31,9 @@
   (let ((listener (tcp-listen port backlog host)))
     (loop
       (let*-values (((in out) (tcp-accept listener)))
+        ;; Reset state machine everytime the client reconnects.
+        (state-machine-reset! 'mqtt-machine)
+
         (parameterize ((tcp-read-timeout #f)
                        (tcp-write-timeout #f))
           (handle-conn sm in out))
