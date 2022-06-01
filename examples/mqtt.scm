@@ -8,13 +8,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (get-field bv fmt field-name)
-  (let* ((alist (parse-message bv fmt))
-         (value (assq field-name alist)))
-    (if value
-      (cdr value)
-      (error (string-append "no field named: " (symbol->string field-name))))))
-
 (define (mqtt-msg-type bv)
   (bytevector->number
     (get-field

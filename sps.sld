@@ -13,8 +13,8 @@
           (sisl))
 
   (export define-state-machine define-state -> state-machine-run
-          state-machine-reset! sm-server parse-message switch
-          bytevector->number)
+          state-machine-reset! sm-server parse-message get-field
+          switch bytevector->number)
 
   (include "lib/util.scm"
            "lib/state-machine.scm"

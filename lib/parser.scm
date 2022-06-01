@@ -90,3 +90,11 @@
                                            prev-end))))))))
             (kons (vector-length bitvector) '())
             (vector->list (input-format-fields fmt)))))))
+
+(: get-field (bytevector (struct Input-Format) symbol -> bytevector))
+(define (get-field bv fmt field-name)
+  (let* ((alist (parse-message bv fmt))
+         (value (assq field-name alist)))
+    (if value
+      (cdr value)
+      (error (string-append "no field named: " (symbol->string field-name))))))
