@@ -3,6 +3,8 @@
         (scheme process-context)
 
         (srfi 1)
+        (srfi 151)
+
         (sisl)
         (sps))
 
@@ -21,6 +23,13 @@
       bv
       (ipv6-packet 0 (udp-datagram (subscribe-fmt 0)))
       'msgid)))
+
+(define (mqtt-will? bv)
+  (define WILL_FLAG #x08)
+
+  (let* ((fmt (ipv6-packet 0 (udp-datagram connect-fmt)))
+         (flags (bytevector->number (get-field bv fmt 'flags))))
+    (not (zero? (bitwise-and flags WILL_FLAG)))))
 
 (define (make-response fmt)
   (ipv6-packet
@@ -80,21 +89,43 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define CONNECT    #x04)
-(define CONNACK    #x05)
-(define DISCONNECT #x18)
-(define SUBSCRIBE  #x12)
-(define SUBACK     #x13)
+(define CONNECT      #x04)
+(define CONNACK      #x05)
+(define DISCONNECT   #x18)
+(define SUBSCRIBE    #x12)
+(define SUBACK       #x13)
+(define PUBLISH      #x0C)
+(define PUBACK       #x0D)
+(define WILLTOPICREQ #x06)
+(define WILLTOPIC    #x07)
+(define WILLMSGREQ   #x08)
+(define WILLMSG      #x09)
 
 (define code-accept #x00)
 (define code-congestion #x01)
 (define code-invalid-topic #x02)
 (define code-unsupported #x03)
 
+(define-input-format connect-fmt
+  (make-uint 'length 8 7)
+  (make-uint 'mtype  8 CONNECT)
+  (make-uint 'flags  8 0)
+  (make-uint 'pid    8 23)
+  (make-uint 'duration 16 0)
+  (make-uint 'clientid 8 1))
+
 (define-input-format (connack-fmt code)
   (make-uint 'length 8 3)
   (make-uint 'mtype  8 CONNACK)
   (make-symbolic 'return 8))
+
+(define-input-format will-topic-req-fmt
+  (make-uint 'length 8 2)
+  (make-uint 'mtype  8 WILLTOPICREQ))
+
+(define-input-format will-msg-req-fmt
+  (make-uint 'length 8 2)
+  (make-uint 'mtype  8 WILLMSGREQ))
 
 (define-input-format (subscribe-fmt id)
   (make-uint 'length  8 7)
@@ -128,7 +159,17 @@
 
   (define-state (pre-connected input)
     (switch (mqtt-msg-type input)
-      ((CONNECT) (-> (make-response (connack-fmt code-accept)) connected))))
+      ((CONNECT) (if (mqtt-will? input)
+                   (-> (make-response will-topic-req-fmt) will-topic-req)
+                   (-> (make-response (connack-fmt code-accept)) connected)))))
+
+  (define-state (will-topic-req input)
+    (switch (mqtt-msg-type input)
+      ((WILLTOPIC) (-> (make-response will-msg-req-fmt) will-msg-req))))
+
+  (define-state (will-msg-req input)
+    (switch (mqtt-msg-type input)
+      ((WILLMSG) (-> (make-response (connack-fmt code-accept)) connected))))
 
   (define-state (connected input)
     (switch (mqtt-msg-type input)
