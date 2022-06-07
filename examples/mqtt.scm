@@ -111,6 +111,13 @@
   (make-uint 'msgid   16 id)
   (make-uint 'return  8 code-accept))
 
+(define-input-format (puback-fmt msg-id topic-id)
+  (make-uint 'length  8 7)
+  (make-uint 'mtype   8 PUBACK)
+  (make-uint 'puback-topic 16 topic-id)
+  (make-uint 'msgid  16 msg-id)
+  (make-symbolic 'puback-return 8))
+
 (define-input-format disconn-fmt
   (make-uint 'length 8 2)
   (make-uint 'type   8 DISCONNECT))
@@ -129,7 +136,12 @@
       ((DISCONNECT) (-> disconn-fmt disconnected))))
 
   (define-state (subscribed input)
-    (error "not implemented"))
+    (switch (mqtt-msg-type input)
+      ((PUBLISH) (-> (make-response
+                       (puback-fmt
+                         (mqtt-msg-id input)
+                         0)) subscribed))
+      ((DISCONNECT) (-> disconn-fmt disconnected))))
 
   (define-state disconnected))
 
