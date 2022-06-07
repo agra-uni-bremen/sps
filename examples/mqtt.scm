@@ -81,12 +81,6 @@
   (make-uint 'length 8 3)
   (make-uint 'mtype  8 0))
 
-;; MQTT-SN CONNACK message
-(define-input-format (mqtt-connack code)
-  (make-uint 'length 8 3)
-  (make-uint 'mtype  8 mqtt-msg-connack)
-  (make-uint 'return 16 code))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define CONNECT      #x04)
