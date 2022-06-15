@@ -83,4 +83,7 @@
 (define-syntax switch
   (syntax-rules ()
     ((switch ARG BODY ...)
-     (%switch ARG BODY ... (else (error "no match"))))))
+     (%switch ARG
+       BODY ...
+       (else
+         (error (string-append "switch: no match with argument: " (->string ARG))))))))

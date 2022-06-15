@@ -7,6 +7,7 @@
 
           (chicken tcp)
           (chicken type)
+          (chicken string)
           (chicken plist)
 
           (bencode)
