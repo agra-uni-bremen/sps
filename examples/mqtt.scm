@@ -149,7 +149,6 @@
 
 (define-state-machine mqtt-machine
   (start pre-connected)
-  (end   disconnected)
 
   (define-state (pre-connected input)
     (switch (mqtt-msg-type input)
@@ -178,7 +177,8 @@
                          0)) subscribed))
       ((DISCONNECT) (-> disconn-fmt disconnected))))
 
-  (define-state disconnected))
+  (define-state (disconnected input)
+    (error "received message after disconnect")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

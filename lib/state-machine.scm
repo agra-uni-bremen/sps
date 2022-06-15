@@ -21,26 +21,20 @@
   ((state-proc state) input))
 
 (define-record-type State-Machine
-  (make-sm state end)
+  (make-sm state)
   state-machine?
-  (state sm-state sm-state-set!)
-  (end sm-end-states))
+  (state sm-state sm-state-set!))
 
 ;; Type annotations for accessors of state machine.
-(: make-sm (state (list-of symbol) -> (struct State-Machine)))
+(: make-sm (state -> (struct State-Machine)))
 ;;(: state-machine? ((struct State-Machine) -> boolean))
 (: sm-state ((struct State-Machine) -> state))
-(: sm-end-states ((struct State-Machine) -> (list-of symbol)))
-
-(: end-state? ((struct State-Machine) state -> boolean))
-(define (end-state? sm state)
-  (member (state-name state) (sm-end-states sm)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-syntax define-state-machine
-  (syntax-rules (start end)
-    ((define-state-machine NAME (start START) (end ENDS) BODY ...)
+  (syntax-rules (start)
+    ((define-state-machine NAME (start START) BODY ...)
      (define-state-machine
        NAME
        (let ((s (get 'state-machines (quote NAME))))
@@ -49,20 +43,15 @@
            (put! 'state-machines
                  (quote NAME)
                  (make-sm
-                   (make-state (quote START) START)
-                   (list (quote ENDS))))))
+                   (make-state (quote START) START)))))
        BODY ...))
     ((define-state-machine NAME SM BODY ...)
      (define (NAME input)
        BODY ...
 
-       (if (end-state? SM (sm-state SM))
-         (error "current state is an end state")
-         (let-values (((ret new-state) (apply-state (sm-state SM) input)))
-           (sm-state-set! SM new-state)
-           (values
-             ret
-             (not (end-state? SM new-state)))))))))
+       (let-values (((ret new-state) (apply-state (sm-state SM) input)))
+         (sm-state-set! SM new-state)
+         ret)))))
 
 (define-syntax define-state
   (syntax-rules ()
@@ -87,8 +76,4 @@
   (remprop! 'state-machines name))
 
 (define (state-machine-run sm input)
-  ;; This can obviously be shortend to (sm input).
-  (let-values (((ret has-next?) (sm input)))
-    (if has-next?
-      (values ret #t)
-      (values ret #f))))
+  (sm input))

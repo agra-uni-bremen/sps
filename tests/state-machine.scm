@@ -1,6 +1,5 @@
 (define-state-machine sm-simple
   (start initial-state)
-  (end   accept-state)
 
   (define-state initial-state
     (-> "initial-state" second-state))
@@ -13,7 +12,6 @@
 
 (define-state-machine sm-choice
   (start initial-state)
-  (end   end-state)
 
   (define-state (initial-state input)
     (match input
@@ -28,8 +26,8 @@
   (define-state end-state))
 
 (define (run-sm sm input)
-  (let-values (((r has-next?) (sm (car input))))
-    (if has-next?
+  (let ((r (sm (car input))))
+    (if (> (length input) 1)
       (cons r (run-sm sm (cdr input)))
       (list r))))
 

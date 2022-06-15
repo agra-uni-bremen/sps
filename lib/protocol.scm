@@ -18,11 +18,10 @@
            (unless (string? msg-content)
              (error "unexpected bencode data type"))
 
-           (let*-values (((bv) (string->utf8 msg-content))
-                         ((resp has-next?) (state-machine-run sm bv)))
+           (let* ((bv (string->utf8 msg-content))
+                  (resp (state-machine-run sm bv)))
              (write-format resp output-port)
-             (when has-next?
-               (handle-conn sm-name sm input-port output-port)))))))))
+             (handle-conn sm-name sm input-port output-port))))))))
 
 (define (%sm-server sm-name sm host port)
   ;; Default backlog according to tcp-listen documentation.
