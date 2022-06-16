@@ -111,7 +111,7 @@
 (define-input-format (connack-fmt code)
   (make-uint 'length 8 3)
   (make-uint 'mtype  8 CONNACK)
-  (make-symbolic 'return 8))
+  (make-symbolic 'connack-return 8))
 
 (define-input-format will-topic-req-fmt
   (make-uint 'length 8 2)
@@ -134,14 +134,7 @@
   (make-uint 'flags   8 0)
   (make-uint 'topicid 16 23)
   (make-uint 'msgid   16 id)
-  (make-uint 'return  8 code-accept))
-
-(define-input-format (puback-fmt msg-id topic-id)
-  (make-uint 'length  8 7)
-  (make-uint 'mtype   8 PUBACK)
-  (make-uint 'puback-topic 16 topic-id)
-  (make-uint 'msgid  16 msg-id)
-  (make-symbolic 'puback-return 8))
+  (make-symbolic 'suback-return 8))
 
 (define-input-format disconn-fmt
   (make-uint 'length 8 2)
@@ -169,13 +162,17 @@
       ((SUBSCRIBE)  (-> (make-response (suback-fmt (mqtt-msg-id input))) subscribed))
       ((DISCONNECT) (-> (make-response disconn-fmt) disconnected))))
 
+  ;; After subscribe we established a lot of state in the MQTT-SN
+  ;; client from here we just send unconstrained symbolic inputs
+  ;; to test the parser etc. As such, we also need to accept
+  ;; abitrary reply message types by the client.
   (define-state (subscribed input)
-    (switch (mqtt-msg-type input)
-      ((PUBLISH) (-> (make-response
-                       (puback-fmt
-                         (mqtt-msg-id input)
-                         0)) subscribed))
-      ((DISCONNECT) (-> (make-response disconn-fmt) disconnected))))
+    (-> (make-response
+          (make-input-format
+            (make-symbolic
+              'mqtt-fully-symbolic
+              (bytes->bits 32))))
+        subscribed))
 
   (define-state (disconnected input)
     (error "received message after disconnect")))
