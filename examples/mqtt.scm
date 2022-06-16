@@ -167,7 +167,7 @@
   (define-state (connected input)
     (switch (mqtt-msg-type input)
       ((SUBSCRIBE)  (-> (make-response (suback-fmt (mqtt-msg-id input))) subscribed))
-      ((DISCONNECT) (-> disconn-fmt disconnected))))
+      ((DISCONNECT) (-> (make-response disconn-fmt) disconnected))))
 
   (define-state (subscribed input)
     (switch (mqtt-msg-type input)
@@ -175,7 +175,7 @@
                        (puback-fmt
                          (mqtt-msg-id input)
                          0)) subscribed))
-      ((DISCONNECT) (-> disconn-fmt disconnected))))
+      ((DISCONNECT) (-> (make-response disconn-fmt) disconnected))))
 
   (define-state (disconnected input)
     (error "received message after disconnect")))
