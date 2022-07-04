@@ -53,7 +53,7 @@
 ;; UDP constants
 (define udp-next-header 17)
 (define udp-port 1883)     ;; CONFIG_EMCUTE_DEFAULT_PORT
-(define udp-src-port 2389) ;; can essentially be anything
+(define udp-src-port 1883) ;; can essentially be anything
 
 ;; MQTT constants
 (define mqtt-msg-connack #x05)
