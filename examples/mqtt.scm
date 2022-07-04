@@ -47,8 +47,8 @@
                           #x00 #x00 #x00 #x01))
 (define ipv6-srcaddr #u8(#xfe #x80 #x00 #x00
                          #x00 #x00 #x00 #x00
-                         #xca #xfe #xca #xfe
-                         #xca #xfe #x00 #x02))
+                         #x00 #x00 #x00 #x00
+                         #x00 #x00 #x00 #x01))
 
 ;; UDP constants
 (define udp-next-header 17)
