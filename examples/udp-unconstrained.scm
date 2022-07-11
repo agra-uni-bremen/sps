@@ -32,10 +32,6 @@
 (define udp-port 1883)     ;; CONFIG_EMCUTE_DEFAULT_PORT
 (define udp-src-port 1883) ;; can essentially be anything
 
-;; MQTT constants
-(define mqtt-msg-connack #x05)
-(define mqtt-code-accept #x00)
-
 ;; See https://datatracker.ietf.org/doc/html/rfc8200#section-3
 (define-input-format (ipv6-packet next-hdr &encapsulate payload)
   (make-uint 'version 4 ipv6-version-value)
