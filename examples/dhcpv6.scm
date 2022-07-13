@@ -148,7 +148,10 @@
   ;; Server Identifier Option
   (make-uint 'optcode-server-id 16 dhcpv6-opt-server-id)
   (make-uint 'optlen-server-id 16 4)
-  (make-concrete 'optdata-server-id (bytes->bits 4) (bytevector #xAA #xBB #xCC #xDD)))
+  (make-concrete 'optdata-server-id (bytes->bits 4) (bytevector #xAA #xBB #xCC #xDD))
+
+  ;; Additional symbolic options.
+  (make-symbolic 'reply-options 128))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
