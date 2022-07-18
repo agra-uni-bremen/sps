@@ -23,8 +23,8 @@
 (define ipv4-dstaddr #u8(#xff #xff #xff #xff))
 
 ;; UDP constants
-(define udp-port 1883)
-(define udp-src-port 1883)
+(define udp-port 68)     ;; DHCPV4_CLIENT_PORT
+(define udp-src-port 67) ;; DHCPV4_SERVER_PORT
 
 ;; See https://datatracker.ietf.org/doc/html/rfc791#section-3.1
 (define-input-format (ipv4-packet protocol &encapsulate payload)
