@@ -133,7 +133,10 @@
   ;; Server Identifier Option
   (make-uint 'optcode-server-id 16 dhcpv6-opt-server-id)
   (make-uint 'optlen-server-id 16 4)
-  (make-concrete 'optdata-server-id (bytes->bits 4) (bytevector #xAA #xBB #xCC #xDD)))
+  (make-concrete 'optdata-server-id (bytes->bits 4) (bytevector #xAA #xBB #xCC #xDD))
+
+  ;; Additional symbolic options.
+  (make-symbolic 'advertise-options 128))
 
 ;; See: https://datatracker.ietf.org/doc/html/rfc8415#section-16.10
 (define-input-format (dhcpv6-reply-fmt id client-id)
@@ -169,6 +172,13 @@
 
   (define-state (advertised input)
     (switch (dhcp-type input)
+      ;; Previous solicit was rejected, try again.
+      ((dhcpv6-solicit) (-> (make-response
+                              (dhcpv6-advertise-fmt
+                                (dhcp-trans-id input)
+                                (dhcp-opt-val input dhcpv6-opt-client-id)))
+                            advertised))
+
       ((dhcpv6-request) (-> (make-response
                               (dhcpv6-reply-fmt
                                 (dhcp-trans-id input)
