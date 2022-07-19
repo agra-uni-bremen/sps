@@ -37,7 +37,7 @@
   (make-uint 'fragment-offset 13 0)
   (make-uint 'ttl 8 #xff)
   (make-uint 'protocol 8 protocol)
-  (make-symbolic 'checksum 16)
+  (make-uint 'checksum 16 0)
   (make-concrete 'src-addr 32 ipv4-srcaddr)
   (make-concrete 'dst-addr 32 ipv4-dstaddr))
 
