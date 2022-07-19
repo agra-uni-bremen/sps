@@ -56,9 +56,10 @@
   (define-state (symbolic input)
     (-> (make-response
           (make-input-format
+            ;; Minimum size of a DHCPv4 message.
             (make-symbolic
               'mqtt-fully-symbolic
-              (bytes->bits 56))))
+              (bytes->bits 236))))
         symbolic)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
