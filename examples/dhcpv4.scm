@@ -54,14 +54,17 @@
 (define dhcpv4-bootrequest 1)
 (define dhcpv4-bootreply 2)
 (define dhcpv4-cookie #u8(#x63 #x82 #x53 #x63))
+(define dhcpv4-eoo #xff) ;; end of options
 
 ;; DHCPv4 message types.
 ;; See https://datatracker.ietf.org/doc/html/rfc2132#section-9.6
 (define dhcpv4-discover 1)
 (define dhcpv4-offer 2)
+(define dhcpv4-request 3)
+(define dhcpv4-ack 5)
 
 ;; See https://datatracker.ietf.org/doc/html/rfc2131#section-2
-(define-input-format (dhcpv4-packet xid flags yiaddr siaddr giaddr chaddr)
+(define-input-format (dhcpv4-packet mtype xid flags yiaddr siaddr giaddr chaddr &encapsulate opts)
   (make-uint 'dhcpv4-op 8 dhcpv4-bootreply)
   (make-uint 'dhcpv4-htype 8 1)
   (make-uint 'dhcpv4-hlen 8 6)
@@ -81,27 +84,28 @@
   (make-concrete 'dhcpv4-cookie 32 dhcpv4-cookie)
 
   ;; Options
+  ;; See: https://datatracker.ietf.org/doc/html/rfc2132#section-9.6
   (make-uint 'dhcpv4-mtype-code 8 53)
   (make-uint 'dhcpv4-mtype-len  8 1)
-  (make-uint 'dhcpv4-mtype-val  8 dhcpv4-offer)
-
-  ;; End of Options <https://datatracker.ietf.org/doc/html/rfc2132#section-3.2>
-  (make-uint 'dhcpv4-option-end 8 #xff))
+  (make-uint 'dhcpv4-mtype-val  8 mtype))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (dhcpv4-field bv field)
-  (get-field
-    bv
-    (ipv4-packet ipv4-udp-protocol (udp-datagram (dhcpv4-packet #u8() #u8() #u8() #u8() #u8() #u8())))
-    field))
+(define dhcpv4-basefmt
+  (ipv4-packet
+    ipv4-udp-protocol
+    (udp-datagram
+      (dhcpv4-packet 0 #u8() #u8() #u8() #u8() #u8() #u8() (make-input-format)))))
 
+(define (dhcpv4-field bv field)
+  (get-field bv dhcpv4-basefmt field))
 (define (dhcpv4-mtype bv)
-  (bytevector->number
-    (get-field
-      bv
-      (ipv4-packet ipv4-udp-protocol (udp-datagram (dhcpv4-packet #u8() #u8() #u8() #u8() #u8() #u8())))
-      'dhcpv4-mtype-val)))
+  (bytevector->number (dhcpv4-field bv 'dhcpv4-mtype-val)))
+
+(define (dhcpv4-make-opts name len)
+  (make-input-format
+    (make-symbolic name len)
+    (make-uint 'dhcpv4-eoo 8 dhcpv4-eoo)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -112,14 +116,30 @@
     (switch (dhcpv4-mtype input)
       ;; See https://datatracker.ietf.org/doc/html/rfc2131#section-4.3.1
       ((dhcpv4-discover) (-> (make-response
-                               (dhcpv4-packet
+                               (dhcpv4-packet dhcpv4-offer
                                  (dhcpv4-field input 'dhcpv4-xid)
                                  (dhcpv4-field input 'dhcpv4-flags)
                                  (dhcpv4-field input 'dhcpv4-yiaddr)
                                  (dhcpv4-field input 'dhcpv4-siaddr)
                                  (dhcpv4-field input 'dhcpv4-giaddr)
-                                 (dhcpv4-field input 'dhcpv4-chaddr)))
-                             symbolic))))
+                                 (dhcpv4-field input 'dhcpv4-chaddr)
+                                 (dhcpv4-make-opts 'discover-opts (bytes->bits 64))))
+                             request))))
+
+  (define-state (request input)
+    (let ((resp-type (switch (dhcpv4-mtype input)
+                             ((dhcpv4-discover) dhcpv4-offer)
+                             ((dhcpv4-request)  dhcpv4-ack))))
+      (-> (make-response
+            (dhcpv4-packet resp-type
+                           (dhcpv4-field input 'dhcpv4-xid)
+                           (dhcpv4-field input 'dhcpv4-flags)
+                           (dhcpv4-field input 'dhcpv4-yiaddr)
+                           (dhcpv4-field input 'dhcpv4-siaddr)
+                           (dhcpv4-field input 'dhcpv4-giaddr)
+                           (dhcpv4-field input 'dhcpv4-chaddr)
+                           (dhcpv4-make-opts 'ack-opts (bytes->bits 64))))
+          symbolic)))
 
   (define-state (symbolic input)
     (-> (make-response
