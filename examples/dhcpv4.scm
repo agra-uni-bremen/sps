@@ -63,9 +63,9 @@
 ;; See https://datatracker.ietf.org/doc/html/rfc2131#section-2
 (define-input-format (dhcpv4-packet xid flags yiaddr siaddr giaddr chaddr)
   (make-uint 'dhcpv4-op 8 dhcpv4-bootreply)
-  (make-symbolic 'dhcpv4-htype 8)
-  (make-symbolic 'dhcpv4-hlen 8)
-  (make-symbolic 'dhcpv4-hops 8)
+  (make-uint 'dhcpv4-htype 8 1)
+  (make-uint 'dhcpv4-hlen 8 6)
+  (make-uint 'dhcpv4-hops 8 0)
   (make-concrete 'dhcpv4-xid 32 xid)
   (make-uint 'dhcpv4-secs 16 0)
   (make-concrete 'dhcpv4-flags 16 flags)
