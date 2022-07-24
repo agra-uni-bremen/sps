@@ -59,7 +59,7 @@
             ;; Minimum size of a DHCPv4 message.
             (make-symbolic
               'mqtt-fully-symbolic
-              (bytes->bits 236))))
+              (bytes->bits 256))))
         symbolic)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
